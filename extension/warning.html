@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhishGuard — Dangerous Site Blocked</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a0505;
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      color: #fff;
+      padding: 20px;
+    }
+    .container { max-width: 560px; width: 100%; text-align: center; }
+
+    .shield-icon { font-size: 72px; margin-bottom: 16px; display: block; animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+    h1 { font-size: 28px; font-weight: 800; color: #ff4444; margin-bottom: 8px; }
+    .subtitle { font-size: 14px; color: #fca5a5; margin-bottom: 24px; line-height: 1.6; }
+
+    .info-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,68,68,0.35);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .info-label { font-size: 11px; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .info-val { font-size: 13px; color: #fff; word-break: break-all; margin-bottom: 16px; font-family: monospace; }
+
+    .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .score-circle {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 3px solid #ff4444;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #ff4444; flex-shrink: 0;
+    }
+    .score-text { flex: 1; }
+    .score-title { font-size: 12px; color: #fca5a5; margin-bottom: 4px; }
+    .bar-bg { background: rgba(255,255,255,0.1); border-radius: 4px; height: 8px; }
+    .bar-fill { height: 8px; border-radius: 4px; background: #ff4444; transition: width 0.4s; }
+
+    .reasons-title { font-size: 11px; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .reason-item { font-size: 12px; color: #fca5a5; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .reason-item::before { content: "⚠ "; font-size: 10px; }
+
+    .mitre-section { margin-top: 12px; font-size: 11px; color: #c4b5fd; }
+
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .btn {
+      flex: 1; min-width: 140px; padding: 13px 20px;
+      border-radius: 8px; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 700; text-align: center; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-back { background: #16a34a; color: #fff; }
+    .btn-poison { background: #7c5cd8; color: #fff; }
+    .btn-proceed { background: transparent; color: #fca5a5; border: 1px solid rgba(255,68,68,0.4); font-size: 12px; padding: 10px 16px; }
+
+    #trap-panel {
+      display: none;
+      background: rgba(124,92,216,0.15); border: 1px solid #7c5cd8;
+      border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: left;
+    }
+    #trap-panel .trap-title { font-size: 14px; font-weight: 700; color: #c4b5fd; margin-bottom: 10px; }
+    #trap-panel .cred-row { font-size: 12px; color: #ddd6fe; margin-bottom: 4px; font-family: monospace; }
+    #trap-panel .trap-note { font-size: 11px; color: #a78bfa; margin-top: 10px; line-height: 1.5; }
+
+    .no-data { color: #fca5a5; font-size: 13px; font-style: italic; padding: 10px 0; }
+    .footer { margin-top: 24px; font-size: 11px; color: rgba(255,255,255,0.3); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="shield-icon">🚨</span>
+    <h1>Dangerous Site Blocked</h1>
+    <p class="subtitle">PhishGuard detected this page as a <strong>phishing site</strong>.<br/>Your navigation has been blocked for your safety.</p>
+
+    <div class="info-card">
+      <div class="info-label">Blocked URL</div>
+      <div class="info-val" id="blocked-url">Loading…</div>
+
+      <div class="score-row">
+        <div class="score-circle" id="score-circle">—</div>
+        <div class="score-text">
+          <div class="score-title">Threat Score</div>
+          <div class="bar-bg"><div class="bar-fill" id="score-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="reasons-title">Why was this blocked?</div>
+      <div id="reasons-list"><div class="no-data">Loading scan data…</div></div>
+      <div class="mitre-section" id="mitre-section"></div>
+    </div>
+
+    <div id="trap-panel">
+      <div class="trap-title">🪤 PhishTrap Active — Honeytoken Planted</div>
+      <div class="cred-row" id="trap-user"></div>
+      <div class="cred-row" id="trap-pass"></div>
+      <div class="cred-row" id="trap-token"></div>
+      <div class="trap-note">✅ You will receive a Chrome notification when the attacker uses these credentials.<br/>Check the Dashboard for token status.</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-back" id="btn-back">← Go Back to Safety</button>
+      <button class="btn btn-poison" id="btn-poison">🪤 PhishTrap</button>
+    </div>
+    <button class="btn btn-proceed" id="btn-proceed" style="width:100%">I understand the risk — proceed anyway</button>
+
+    <div class="footer">🛡️ PhishGuard · Protecting you from phishing attacks</div>
+  </div>
+
+  <script src="warning.js"></script>
+</body>
+</html>

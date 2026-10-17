@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhishGuard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px;
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      background: #f7f8fa;
+      color: #1f2328;
+    }
+
+    /* Header */
+    .header {
+      background: #1f2328;
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo { font-size: 22px; }
+    .header-title { font-size: 16px; font-weight: 700; }
+    .header-sub { font-size: 10px; color: #8b949e; }
+
+    /* Score card */
+    .score-card {
+      margin: 12px;
+      background: #fff;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      overflow: hidden;
+    }
+    .score-header {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .verdict-badge {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      color: #fff;
+    }
+    .score-num { margin-left: auto; font-size: 20px; font-weight: 800; }
+    .score-body { padding: 0 14px 12px; }
+    .url-text { font-size: 10px; color: #57606a; word-break: break-all; margin-bottom: 8px; }
+    .bar-bg { background: #e5e7eb; border-radius: 4px; height: 6px; margin-bottom: 8px; }
+    .bar-fill { height: 6px; border-radius: 4px; transition: width 0.4s; }
+    .reasons-title { font-size: 11px; font-weight: 600; color: #57606a; margin-bottom: 4px; }
+    .reason-item { font-size: 11px; color: #57606a; padding: 2px 0; }
+    .mitre-text { font-size: 10px; color: #7c5cd8; margin-top: 6px; }
+
+    /* Scanning / error states */
+    .state-box {
+      margin: 12px;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 20px;
+      text-align: center;
+      color: #57606a;
+      font-size: 12px;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #3b82d4;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer buttons */
+    .footer {
+      padding: 10px 12px;
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+    }
+    .btn {
+      flex: 1;
+      padding: 7px 0;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-dashboard { background: #1f2328; color: #fff; }
+    .btn-rescan { background: #f3f4f6; color: #374151; }
+
+    /* Stats mini row */
+    .stats-row {
+      display: flex;
+      margin: 0 12px 12px;
+      gap: 6px;
+    }
+    .stat-chip {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 6px 4px;
+      text-align: center;
+    }
+    .stat-num { font-size: 16px; font-weight: 700; }
+    .stat-label { font-size: 9px; color: #57606a; }
+    .safe-num { color: #16a34a; }
+    .sus-num { color: #d97706; }
+    .dan-num { color: #dc2626; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="header-logo">🛡️</span>
+    <div>
+      <div class="header-title">PhishGuard</div>
+      <div class="header-sub">Real-time phishing protection</div>
+    </div>
+  </div>
+
+  <div id="main-content">
+    <div class="state-box" id="loading-box">
+      <div class="spinner"></div>
+      Scanning current page…
+    </div>
+  </div>
+
+  <div class="stats-row" id="stats-row" style="display:none">
+    <div class="stat-chip">
+      <div class="stat-num" id="stat-total">—</div>
+      <div class="stat-label">Scans</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-num safe-num" id="stat-safe">—</div>
+      <div class="stat-label">Safe</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-num sus-num" id="stat-sus">—</div>
+      <div class="stat-label">Suspicious</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-num dan-num" id="stat-dan">—</div>
+      <div class="stat-label">Dangerous</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="btn btn-dashboard" id="btn-dashboard">📊 Dashboard</button>
+    <button class="btn btn-rescan" id="btn-rescan">🔄 Re-scan</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

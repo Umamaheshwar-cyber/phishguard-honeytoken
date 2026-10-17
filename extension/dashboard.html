@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhishGuard Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      background: #f7f8fa;
+      color: #1f2328;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .topbar {
+      background: #1f2328;
+      color: #fff;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-logo { font-size: 26px; }
+    .topbar-title { font-size: 18px; font-weight: 800; }
+    .topbar-sub { font-size: 11px; color: #8b949e; margin-top: 1px; }
+    .topbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #6b7280;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .status-dot.online { background: #16a34a; }
+    .status-text { font-size: 11px; color: #8b949e; }
+    .btn-refresh {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn-refresh:hover { background: rgba(255,255,255,0.18); }
+
+    /* ── Page layout ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+
+    /* ── Stats cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .stat-card .sc-label { font-size: 11px; color: #57606a; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-card .sc-val { font-size: 28px; font-weight: 800; }
+    .stat-card .sc-sub { font-size: 10px; color: #57606a; margin-top: 2px; }
+    .safe-val { color: #16a34a; }
+    .sus-val { color: #d97706; }
+    .dan-val { color: #dc2626; }
+    .trap-val { color: #7c5cd8; }
+    .trig-val { color: #dc2626; }
+
+    /* ── Section headers ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; }
+    .section-badge {
+      font-size: 11px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      padding: 2px 10px;
+      color: #57606a;
+    }
+
+    /* ── Tables ── */
+    .table-wrap {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f7f8fa;
+      font-size: 11px;
+      font-weight: 600;
+      color: #57606a;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+    tbody tr { border-bottom: 1px solid #f3f4f6; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+    td { padding: 10px 14px; font-size: 12px; vertical-align: middle; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .badge-safe { background: #16a34a; }
+    .badge-suspicious { background: #d97706; }
+    .badge-dangerous { background: #dc2626; }
+    .badge-unknown { background: #6b7280; }
+    .badge-active { background: #7c5cd8; }
+    .badge-triggered { background: #dc2626; }
+
+    /* ── URL cell ── */
+    .url-cell { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #3b82d4; font-size: 11px; }
+    .reasons-cell { max-width: 240px; font-size: 10px; color: #57606a; }
+    .mitre-cell { max-width: 200px; font-size: 10px; color: #7c5cd8; }
+    .mono { font-family: monospace; font-size: 11px; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      padding: 32px;
+      text-align: center;
+      color: #57606a;
+      font-size: 13px;
+    }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; }
+
+    /* ── Token actions ── */
+    .btn-copy {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 5px;
+      padding: 3px 10px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .btn-copy:hover { background: #e5e7eb; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .tab-btn {
+      padding: 7px 18px;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: #57606a;
+    }
+    .tab-btn.active { background: #1f2328; color: #fff; border-color: #1f2328; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 24px; height: 24px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #3b82d4;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 30px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="topbar">
+    <span class="topbar-logo">🛡️</span>
+    <div>
+      <div class="topbar-title">PhishGuard Dashboard</div>
+      <div class="topbar-sub">PhishTrap · Scans · Statistics</div>
+    </div>
+    <div class="topbar-right">
+      <span><span class="status-dot" id="status-dot"></span><span class="status-text" id="status-text">Connecting…</span></span>
+      <button class="btn-refresh" id="btn-refresh">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <!-- Stats row -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="sc-label">Total Scans</div><div class="sc-val" id="s-total">—</div><div class="sc-sub">all time</div></div>
+      <div class="stat-card"><div class="sc-label">Safe</div><div class="sc-val safe-val" id="s-safe">—</div><div class="sc-sub">clean URLs</div></div>
+      <div class="stat-card"><div class="sc-label">Suspicious</div><div class="sc-val sus-val" id="s-sus">—</div><div class="sc-sub">needs review</div></div>
+      <div class="stat-card"><div class="sc-label">Dangerous</div><div class="sc-val dan-val" id="s-dan">—</div><div class="sc-sub">blocked</div></div>
+      <div class="stat-card"><div class="sc-label">Tokens Active</div><div class="sc-val trap-val" id="s-tok-active">—</div><div class="sc-sub">honeytokens</div></div>
+      <div class="stat-card"><div class="sc-label">Triggered</div><div class="sc-val trig-val" id="s-tok-trig">—</div><div class="sc-sub">attacker used</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="scans">🔍 Recent Scans</button>
+      <button class="tab-btn" data-tab="tokens">🪤 PhishTrap Tokens</button>
+    </div>
+
+    <!-- Scans tab -->
+    <div class="tab-panel active" id="tab-scans">
+      <div class="section-header">
+        <span class="section-title">Recent Scans</span>
+        <span class="section-badge" id="scan-count">Loading…</span>
+      </div>
+      <div class="table-wrap">
+        <div class="spinner" id="scans-spinner"></div>
+        <table id="scans-table" style="display:none">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>URL</th>
+              <th>Verdict</th>
+              <th>Score</th>
+              <th>Detection Signals</th>
+              <th>MITRE Tags</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="scans-body"></tbody>
+        </table>
+        <div class="empty-state" id="scans-empty" style="display:none">
+          <div class="empty-icon">🔍</div>
+          No scans yet. Browse the web with PhishGuard active.
+        </div>
+      </div>
+    </div>
+
+    <!-- Tokens tab -->
+    <div class="tab-panel" id="tab-tokens">
+      <div class="section-header">
+        <span class="section-title">PhishTrap Honeytokens</span>
+        <span class="section-badge" id="token-count">Loading…</span>
+      </div>
+      <div class="table-wrap">
+        <div class="spinner" id="tokens-spinner"></div>
+        <table id="tokens-table" style="display:none">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Site</th>
+              <th>Token</th>
+              <th>Decoy Email</th>
+              <th>Decoy Password</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Triggered</th>
+            </tr>
+          </thead>
+          <tbody id="tokens-body"></tbody>
+        </table>
+        <div class="empty-state" id="tokens-empty" style="display:none">
+          <div class="empty-icon">🪤</div>
+          No honeytokens yet. Click <b>PhishTrap</b> on a dangerous site to plant one.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
