@@ -1,4 +1,4 @@
-# 🛡️ PhishGuard + PhishTrap + Honeytoken
+# 🛡️ PhishGuard + PhishTrap
 
 Real-time phishing detection Chrome extension with explainable scores, overlay cards, and deception technology honeytokens.
 
